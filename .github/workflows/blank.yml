@@ -34,8 +34,8 @@ jobs:
           npm install
           npm run build
           # 替换相对路径
-          sed -i "" "s|script src=\"|script src=\"./angular/|" ./dist/angular-test2/index.html
-          sed -i "" "s|href=\"|href=\"./angular/|" ./dist/angular-test2/index.html
+          sed -i "s|script src=\"|script src=\"./angular/|" ./dist/angular-test2/index.html
+          sed -i "s|href=\"|href=\"./angular/|" ./dist/angular-test2/index.html
       - name: Deploy   # 部署
         uses: JamesIves/github-pages-deploy-action@v4.3.3
         with:
