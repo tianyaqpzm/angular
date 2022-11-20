@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>AngularTest2</title>
+    <base href="/angular" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/x-icon" href="favicon.ico" />
+    <!-- <script src="../node_modules/tracking/build/tracking-min.js"></script>
+    <script src="../node_modules/tracking/build/data/face-min.js"></script> -->
+  </head>
+  <body>
+    <script type="text/javascript">
+      var isMobile = false,
+        isAndroid = false,
+        isIOS = false,
+        isMcloudApp = false,
+        isCallFromWX = false;
+      if (
+        /iPhone|iPad|iPod|Windows Phone|webOS|(BlackBerry).*Version|(BB10).*Version|IEMobile|Opera Mini/i.test(
+          navigator.userAgent
+        )
+      ) {
+        isMobile = true;
+        isIOS = true;
+      } else if (/Android/i.test(navigator.userAgent)) {
+        isMobile = true;
+        isAndroid = true;
+      }
+      if (
+        /MicroMessenger/i.test(navigator.userAgent) &&
+        /mobile/i.test(navigator.userAgent)
+      ) {
+        isCallFromWX = true;
+      }
+    </script>
+    <app-root></app-root>
+  </body>
+</html>

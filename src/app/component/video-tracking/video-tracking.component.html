@@ -1,0 +1,26 @@
+<div class="content">
+  <!-- autoplay -->
+  <video
+    width="318"
+    height="270"
+    id="video_bind"
+    #targetOrigin
+    muted
+    controls="controls"
+    autoplay
+    playsinline
+    webkit-playsinline="true"
+  ></video>
+  <canvas id="canvas_bind" width="318" height="270"></canvas>
+  <div class="tip-box text-center"></div>
+
+  <!-- <div>
+    {{ informationTitle }}
+  </div> -->
+  <div>
+    <button type="button" (click)="init()">继续</button>
+    <button type="button" (click)="tackPhoto()">拍照</button>
+  </div>
+
+  <div>{{ error }}</div>
+</div>
