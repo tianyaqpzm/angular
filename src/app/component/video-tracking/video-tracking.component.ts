@@ -61,12 +61,7 @@ export class VideoTrackingComponent implements OnInit {
     this.facecontext = this.facecanvas.getContext('2d');
     var tracker = new tracking.ObjectTracker('face');
     // 每次打开弹框先清除canvas没拍的照片
-    this.facecontext.clearRect(
-      0,
-      0,
-      this.facecanvas.width,
-      this.facecanvas.height
-    );
+    this.facecontext.clearRect(0, 0, this.facecanvas.width, this.facecanvas.height);
 
     if (navigator.mediaDevices === undefined) {
       (navigator as any).mediaDevices = {};
@@ -81,9 +76,7 @@ export class VideoTrackingComponent implements OnInit {
           (navigator as any).oGetUserMedia;
         if (!getUserMedia) {
           this.error = 'getUserMedia is not implemented in this browser';
-          return Promise.reject(
-            new Error('getUserMedia is not implemented in this browser')
-          );
+          return Promise.reject(new Error('getUserMedia is not implemented in this browser'));
         }
         return new Promise(function(resolve, reject) {
           getUserMedia.call(navigator, constraints, resolve, reject);
@@ -99,12 +92,14 @@ export class VideoTrackingComponent implements OnInit {
         }
       })
       .then(stream => {
+        this.error += '【3.getUserMedia then,】';
         this.getVideoStream(stream);
         // 使用监听人脸的包
         tracker.setInitialScale(4);
         tracker.setStepSize(2);
         tracker.setEdgesDensity(0.1);
 
+        this.error += '【4.tracking.track start】';
         //打开摄像头
         this.tra = tracking.track('#video_bind', tracker, {
           camera: true
@@ -124,17 +119,11 @@ export class VideoTrackingComponent implements OnInit {
         // 创建监听 每帧都会触发
         tracker.on('track', (event: any) => {
           if (!tipFlag) {
-            this.facecontext.clearRect(
-              0,
-              0,
-              this.facecanvas.width,
-              this.facecanvas.height
-            );
+            this.facecontext.clearRect(0, 0, this.facecanvas.width, this.facecanvas.height);
             if (event.data.length === 0) {
               //未检测到人脸
               if (!faceflag && !timer) {
                 timer = setTimeout(() => {
-                  this.informationTitle = '未检测到人脸';
                   informationTitle.innerHTML = '未检测到人脸';
                 }, 500);
               }
@@ -154,12 +143,7 @@ export class VideoTrackingComponent implements OnInit {
                   //   40
                   // );
                   this.facecontext.strokeStyle = '#a64ceb';
-                  this.facecontext.strokeRect(
-                    rect.x,
-                    rect.y,
-                    rect.width,
-                    rect.height
-                  );
+                  this.facecontext.strokeRect(rect.x, rect.y, rect.width, rect.height);
                 });
                 let rect = event.data[0];
                 //判断脸部是否在屏幕中间
@@ -189,7 +173,7 @@ export class VideoTrackingComponent implements OnInit {
         });
       })
       .catch(err => {
-        this.error = err;
+        this.error += `【 ${err}】`;
         this.informationTitle = '打开摄像头失败';
       });
   }
@@ -204,8 +188,7 @@ export class VideoTrackingComponent implements OnInit {
       try {
         this.target.nativeElement.srcObject = this.buffer;
       } catch (error) {
-        this.target.nativeElement.src =
-          window.URL && window.URL.createObjectURL(this.buffer);
+        this.target.nativeElement.src = window.URL && window.URL.createObjectURL(this.buffer);
       }
     }
     this.target.nativeElement?.play();
@@ -214,33 +197,14 @@ export class VideoTrackingComponent implements OnInit {
   tackPhoto() {
     // 为什么调用getObjectFitSize，因为摄像头获取的图片和绘制的图片大小和区域可能不一致
     // 所以需要把人脸置于屏幕中间，绘制中间部分图片,如果不需要直接调用第二种方式
-    const {
-      sx,
-      sy,
-      swidth,
-      sheight,
-      x,
-      y,
-      width,
-      height
-    } = this.getObjectFitSize(
+    const { sx, sy, swidth, sheight, x, y, width, height } = this.getObjectFitSize(
       'cover',
       this.facevideo.clientWidth,
       this.facevideo.clientHeight,
       window.videoWidth,
       window.videoHeight
     );
-    this.facecontext.drawImage(
-      this.facevideo,
-      sx,
-      sy,
-      swidth,
-      sheight,
-      x,
-      y,
-      width,
-      height
-    );
+    this.facecontext.drawImage(this.facevideo, sx, sy, swidth, sheight, x, y, width, height);
     // 第二种方式
     // facecontext.drawImage(facevideo, 0, 0, facevideo.clientWidth, facevideo.clientHeight);
     var snapData = this.facecanvas.toDataURL('image/png');
@@ -250,9 +214,7 @@ export class VideoTrackingComponent implements OnInit {
     sessionStorage.setItem('faceImage', imgSrc);
     // history.go(-1);
     // history.back();
-    this.facevideo.srcObject
-      .getTracks()
-      .forEach((track: { stop: () => any }) => track.stop());
+    this.facevideo.srcObject.getTracks().forEach((track: { stop: () => any }) => track.stop());
     // 取消监听
     this.tra.stop();
     this.flag = false;
@@ -267,13 +229,7 @@ export class VideoTrackingComponent implements OnInit {
    * @param {*} imgHeight  图片高度
    * @return {*} canvas drawImage的所有入参
    */
-  getObjectFitSize(
-    type = 'cover',
-    containerWidth: any,
-    containerHeight: any,
-    imgWidth: any,
-    imgHeight: any
-  ) {
+  getObjectFitSize(type = 'cover', containerWidth: any, containerHeight: any, imgWidth: any, imgHeight: any) {
     let radio = 1, // 容器与图片的比例
       sx = 0, // 开始剪切的 x 坐标位置。
       sy = 0, // 开始剪切的 y 坐标位置。
