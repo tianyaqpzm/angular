@@ -38,7 +38,6 @@ export class VideoTrackingComponent implements OnInit {
   init(): void {
     // 针对ios特殊处理
     if (window.isIOS) {
-      console.log('tst');
       let videoId = document.getElementById('video_bind');
       videoId?.removeAttribute('controls');
     }
@@ -73,11 +72,15 @@ export class VideoTrackingComponent implements OnInit {
       (navigator as any).mediaDevices = {};
     }
     if (navigator.mediaDevices.getUserMedia === undefined) {
-      navigator.mediaDevices.getUserMedia = function(constraints) {
+      navigator.mediaDevices.getUserMedia = constraints => {
         var getUserMedia =
           (navigator as any).webkitGetUserMedia ||
-          (navigator as any).mozGetUserMedia;
+          (navigator as any).mozGetUserMedia ||
+          (navigator as any).mozGetUserMedia ||
+          (navigator as any).msGetUserMedia ||
+          (navigator as any).oGetUserMedia;
         if (!getUserMedia) {
+          this.error = 'getUserMedia is not implemented in this browser';
           return Promise.reject(
             new Error('getUserMedia is not implemented in this browser')
           );
