@@ -36,6 +36,7 @@ export class VideoTrackingComponent implements OnInit {
   }
 
   init(): void {
+    this.error = '';
     // 针对ios特殊处理
     if (window.isIOS) {
       let videoId = document.getElementById('video_bind');
@@ -104,6 +105,8 @@ export class VideoTrackingComponent implements OnInit {
         this.tra = tracking.track('#video_bind', tracker, {
           camera: true
         });
+        this.error += '【5.tracking.track end';
+
         var timer: NodeJS.Timeout | null = null;
 
         // tracker.on('track', function(event) {
