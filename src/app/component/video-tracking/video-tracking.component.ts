@@ -84,7 +84,7 @@ export class VideoTrackingComponent implements OnInit {
         });
       };
     }
-    navigator.getUserMedia = navigator.mediaDevices.getUserMedia;
+    (navigator as any).getUserMedia = navigator.mediaDevices.getUserMedia;
     navigator.mediaDevices
       .getUserMedia({
         audio: false,
