@@ -18,6 +18,8 @@ declare const tracking: {
 export class VideoTrackingComponent implements OnInit {
   @ViewChild('targetOrigin', { static: true }) target!: ElementRef;
 
+  @ViewChild('targetVideo', { static: true }) targetVideo!: ElementRef;
+
   trackerTask: any;
   facevideo: any;
   facecanvas: any;
@@ -26,9 +28,13 @@ export class VideoTrackingComponent implements OnInit {
   facecontext: any;
   tra: any;
   buffer: any;
-  informationTitle: string = '';
   flag = true;
   error: any;
+  recorder: any;
+
+  // 绘制动画
+  requestAnimationFrame: any;
+  informationTitle: any;
   constructor() {}
 
   ngOnInit(): void {
@@ -44,7 +50,7 @@ export class VideoTrackingComponent implements OnInit {
     }
     var tipFlag = false; // 是否检测
     var faceflag = false; // 是否进行拍照
-    var informationTitle: any = document.querySelector('.tip-box'); //人脸提示
+    this.informationTitle = document.querySelector('.tip-box'); //人脸提示
     // 获取video、canvas实例
     this.facevideo = document.getElementById('video_bind');
     this.facecanvas = document.getElementById('canvas_bind');
@@ -94,7 +100,7 @@ export class VideoTrackingComponent implements OnInit {
       })
       .then(stream => {
         this.error += '【3.getUserMedia then,】';
-        this.getVideoStream(stream);
+        this.getVideoStream(this.target, stream);
         // 使用监听人脸的包
         tracker.setInitialScale(4);
         tracker.setStepSize(2);
@@ -105,7 +111,7 @@ export class VideoTrackingComponent implements OnInit {
         this.tra = tracking.track('#video_bind', tracker, {
           camera: true
         });
-        this.error += '【5.tracking.track end';
+        this.error += '【5.tracking.track end】';
 
         var timer: NodeJS.Timeout | null = null;
 
@@ -127,14 +133,14 @@ export class VideoTrackingComponent implements OnInit {
               //未检测到人脸
               if (!faceflag && !timer) {
                 timer = setTimeout(() => {
-                  informationTitle.innerHTML = '未检测到人脸';
+                  this.informationTitle.innerHTML = '未检测到人脸';
                 }, 500);
               }
             } else if (event.data.length === 1) {
               // 长度为多少代表检测到几张人脸
               window.clearTimeout(timer);
               timer = null;
-              informationTitle.innerHTML = '请将脸部置于屏幕中央';
+              this.informationTitle.innerHTML = '请将脸部置于屏幕中央';
               //检测到一张人脸
               if (!tipFlag) {
                 // 给检测到的人脸绘制矩形
@@ -156,20 +162,20 @@ export class VideoTrackingComponent implements OnInit {
                   rect.x < this.facevideo.clientWidth * 0.7
                 ) {
                   // 检测到人脸进行拍照，延迟0.5秒
-                  informationTitle.innerHTML = '识别中，请勿乱动~';
-                  this.informationTitle = '识别中，请勿乱动~';
+                  this.informationTitle.innerHTML = '识别中，请勿乱动~';
                   faceflag = true;
                   tipFlag = true;
                   setTimeout(() => {
-                    this.tackPhoto(); // 拍照
+                    // this.tackPhoto(); // 拍照
+                    // 开始录制
+                    this.getRecorder(stream);
                   }, 1000);
                 }
               }
             } else {
               //检测到多张人脸
               if (!faceflag) {
-                this.informationTitle = '只可一人进行人脸识别！';
-                informationTitle.innerHTML = '只可一人进行人脸识别！';
+                this.informationTitle.innerHTML = '只可一人进行人脸识别！';
               }
             }
           }
@@ -180,21 +186,74 @@ export class VideoTrackingComponent implements OnInit {
         this.informationTitle = '打开摄像头失败';
       });
   }
+  sleep(m: number) {
+    return new Promise(r => setTimeout(r, m));
+  }
+
+  getRecorder(stream: any) {
+    this.error += `【6. startRecording } 】`;
+    this.recorder = window.RecordRTC(stream, {
+      type: 'video'
+    });
+    window.stream = stream;
+    this.recorder.startRecording();
+    // await this.sleep(3000);
+    // await this.recorder.stopRecording();
+    // 4s后停止录制
+    this.circle();
+  }
+
+  circle() {
+    setTimeout(() => {
+      this.informationTitle.innerHTML = '请点头～～';
+    }, 2 * 1000);
+    setTimeout(() => {
+      this.endVideo();
+    }, 4 * 1000);
+  }
+  endVideo() {
+    this.error += `【7. stopRecording } 】`;
+    this.recorder.stopRecording(async () => {
+      this.requestAnimationFrame && window.cancelAnimationFrame(this.requestAnimationFrame);
+      await this.sleep(1000);
+      window.stream
+        .getVideoTracks()
+        .concat(window.stream.getAudioTracks())
+        .forEach((track: any) => {
+          track.stop();
+          this.uploadVideo();
+        });
+    });
+  }
+  uploadVideo() {
+    const videoFile = this.recorder.getBlob();
+    const size = this.bytesToSize(videoFile.size);
+    this.error += `【8. start upload video size: ${size} 】`;
+
+    this.getVideoStream(this.targetVideo, window.stream);
+  }
+  // throw new Error('Method not implemented.');
+
+  bytesToSize(e: number) {
+    if (0 === e) return '0 Bytes';
+    let t = parseInt(String(Math.floor(Math.log(e) / Math.log(1024))), 10);
+    return (e / Math.pow(1e3, t)).toPrecision(3) + ' ' + ['Bytes', 'KB', 'MB', 'GB', 'TB'][t];
+  }
 
   //调用成功
-  private getVideoStream(stream: any) {
+  private getVideoStream(ele: ElementRef, stream: any) {
     this.buffer = stream;
-    console.log('this.target.nativeElement:', this.target);
-    if (this.target.nativeElement.mozSrcObject !== undefined) {
-      this.target.nativeElement.mozSrcObject = this.buffer;
+    console.log('this.target.nativeElement:', ele);
+    if (ele.nativeElement.mozSrcObject !== undefined) {
+      ele.nativeElement.mozSrcObject = this.buffer;
     } else {
       try {
-        this.target.nativeElement.srcObject = this.buffer;
+        ele.nativeElement.srcObject = this.buffer;
       } catch (error) {
-        this.target.nativeElement.src = window.URL && window.URL.createObjectURL(this.buffer);
+        ele.nativeElement.src = window.URL && window.URL.createObjectURL(this.buffer);
       }
     }
-    this.target.nativeElement?.play();
+    ele.nativeElement?.play();
   }
 
   tackPhoto() {
