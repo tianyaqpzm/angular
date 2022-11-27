@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
+import { FormsModule } from '@angular/forms';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -22,15 +23,15 @@ import { VideoTrackingComponent } from './component/video-tracking/video-trackin
     VideoPlayerComponent,
     DemoComponent,
     VideoOriginComponent,
-    VideoTrackingComponent
+    VideoTrackingComponent,
   ],
-  imports: [BrowserModule, AppRoutingModule, HttpClientModule],
+  imports: [BrowserModule, AppRoutingModule, HttpClientModule, FormsModule],
   providers: [
     {
       provide: LocationStrategy,
-      useClass: HashLocationStrategy
-    }
+      useClass: HashLocationStrategy,
+    },
   ],
-  bootstrap: [RootComponent]
+  bootstrap: [RootComponent],
 })
 export class AppModule {}

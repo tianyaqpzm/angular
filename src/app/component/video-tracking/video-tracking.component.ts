@@ -1,4 +1,6 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Utils } from 'src/utils/CommonUtils';
+
 declare const window: any;
 
 // require('tracking/build/tracking-min.js')
@@ -13,7 +15,7 @@ declare const tracking: {
 @Component({
   selector: 'app-video-tracking',
   templateUrl: './video-tracking.component.html',
-  styleUrls: ['./video-tracking.component.css']
+  styleUrls: ['./video-tracking.component.css'],
 })
 export class VideoTrackingComponent implements OnInit {
   @ViewChild('targetOrigin', { static: true }) target!: ElementRef;
@@ -29,20 +31,33 @@ export class VideoTrackingComponent implements OnInit {
   tra: any;
   buffer: any;
   flag = true;
-  error: any;
+  logger: any;
   recorder: any;
 
   // 绘制动画
   requestAnimationFrame: any;
   informationTitle: any;
-  constructor() {}
+  videoBitsPerSecond: number;
+  constructor() {
+    this.videoBitsPerSecond = 64000;
+  }
 
   ngOnInit(): void {
     this.init();
   }
 
   init(): void {
-    this.error = '';
+    console.log(this.videoBitsPerSecond);
+    // ua: string;
+    // browser: IBrowser;
+    // device: IDevice;
+    // engine: IEngine;
+    // os: IOS;
+    // cpu: ICPU;
+    const { browser, ua, device, os } = Utils.getUserAgent();
+
+    // this.logger = `browser:${browser.name}; device:${device.type}; os:${os.name}${os.version};\n`;
+    this.logger = `ua:${ua};  `;
     // 针对ios特殊处理
     if (window.isIOS) {
       let videoId = document.getElementById('video_bind');
@@ -59,7 +74,7 @@ export class VideoTrackingComponent implements OnInit {
 
     // var videoWidth = (window.videoHeight = 0);
     // "noImplicitAny": false, tsconfig.json
-    this.facevideo.addEventListener('canplay', function(this: any, err: any) {
+    this.facevideo.addEventListener('canplay', function (this: any, err: any) {
       debugger;
       window.videoWidth = this.videoWidth;
       window.videoHeight = this.videoHeight;
@@ -74,7 +89,7 @@ export class VideoTrackingComponent implements OnInit {
       (navigator as any).mediaDevices = {};
     }
     if (navigator.mediaDevices.getUserMedia === undefined) {
-      navigator.mediaDevices.getUserMedia = constraints => {
+      navigator.mediaDevices.getUserMedia = (constraints) => {
         var getUserMedia =
           (navigator as any).webkitGetUserMedia ||
           (navigator as any).mozGetUserMedia ||
@@ -82,10 +97,10 @@ export class VideoTrackingComponent implements OnInit {
           (navigator as any).msGetUserMedia ||
           (navigator as any).oGetUserMedia;
         if (!getUserMedia) {
-          this.error = 'getUserMedia is not implemented in this browser';
+          this.logger = 'getUserMedia is not implemented in this browser';
           return Promise.reject(new Error('getUserMedia is not implemented in this browser'));
         }
-        return new Promise(function(resolve, reject) {
+        return new Promise(function (resolve, reject) {
           getUserMedia.call(navigator, constraints, resolve, reject);
         });
       };
@@ -95,23 +110,23 @@ export class VideoTrackingComponent implements OnInit {
       .getUserMedia({
         audio: false,
         video: {
-          facingMode: 'user'
-        }
+          facingMode: 'user',
+        },
       })
-      .then(stream => {
-        this.error += '【3.getUserMedia then,】';
+      .then((stream) => {
+        this.logger += '【3.getUserMedia then,】';
         this.getVideoStream(this.target, stream);
         // 使用监听人脸的包
         tracker.setInitialScale(4);
         tracker.setStepSize(2);
         tracker.setEdgesDensity(0.1);
 
-        this.error += '【4.tracking.track start】';
+        this.logger += '【4.tracking.track start】';
         //打开摄像头
         this.tra = tracking.track('#video_bind', tracker, {
-          camera: true
+          camera: true,
         });
-        this.error += '【5.tracking.track end】';
+        this.logger += '【5.tracking.track end】';
 
         var timer: NodeJS.Timeout | null = null;
 
@@ -181,19 +196,34 @@ export class VideoTrackingComponent implements OnInit {
           }
         });
       })
-      .catch(err => {
-        this.error += `【 ${err}】`;
+      .catch((err) => {
+        this.logger += `【 ${err}】`;
         this.informationTitle = '打开摄像头失败';
       });
   }
   sleep(m: number) {
-    return new Promise(r => setTimeout(r, m));
+    return new Promise((r) => setTimeout(r, m));
   }
 
   getRecorder(stream: any) {
-    this.error += `【6. startRecording } 】`;
+    this.logger += `【6. startRecording } 】`;
+
+    // 按下Enter后自动添加到列表
+    // fromEvent<KeyboardEvent>(this.AddTodoInput.nativeElement, 'keyup')
+    // .pipe(
+    //   filter((event) => event.key === 'Enter'),
+    //   map((event) => (<HTMLInputElement>event.target).value),
+    //   map((title) => title.trim()),
+    //   filter((title) => title !== '')
+    // )
+    // .subscribe((title) => {
+    //   this.store.dispatch(addTodo({ title }))
+    //   this.AddTodoInput.nativeElement.value = ''
+    // })
     this.recorder = window.RecordRTC(stream, {
-      type: 'video'
+      type: 'video',
+      // only for video track
+      videoBitsPerSecond: this.videoBitsPerSecond,
     });
     window.stream = stream;
     this.recorder.startRecording();
@@ -212,7 +242,7 @@ export class VideoTrackingComponent implements OnInit {
     }, 4 * 1000);
   }
   endVideo() {
-    this.error += `【7. stopRecording } 】`;
+    this.logger += `【7. stopRecording } 】`;
     this.recorder.stopRecording(async () => {
       this.requestAnimationFrame && window.cancelAnimationFrame(this.requestAnimationFrame);
       await this.sleep(1000);
@@ -228,7 +258,7 @@ export class VideoTrackingComponent implements OnInit {
   uploadVideo() {
     const videoFile = this.recorder.getBlob();
     const size = this.bytesToSize(videoFile.size);
-    this.error += `【8. start upload video size: ${size} 】`;
+    this.logger += `【8. start upload video size: ${size} 】`;
 
     this.getVideoStream(this.targetVideo, window.stream);
   }
@@ -339,7 +369,7 @@ export class VideoTrackingComponent implements OnInit {
       x,
       y,
       width,
-      height
+      height,
     };
   }
   public openCamera() {
@@ -354,10 +384,10 @@ export class VideoTrackingComponent implements OnInit {
 
     this.trackerTask = tracking.track('#video', tracker, { camera: true });
 
-    tracker.on('track', function(event: any) {
+    tracker.on('track', function (event: any) {
       context.clearRect(0, 0, canvas.width, canvas.height);
 
-      event.data.forEach(function(rect: any) {
+      event.data.forEach(function (rect: any) {
         context.font = '11px Helvetica';
         context.fillText('已识别到人脸，请点击拍照', 100, 40);
         context.strokeStyle = '#a64ceb';

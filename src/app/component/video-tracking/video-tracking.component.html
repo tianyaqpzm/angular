@@ -17,12 +17,15 @@
   <!-- <div>
     {{ informationTitle }}
   </div> -->
+  <hr />
   <div>
+    <!-- [(ngModel)]="userForm.username" -->
+    <input #vidoeInput type="text" class="form-control" placeholder="请在此处添加" [(ngModel)]="videoBitsPerSecond" />
     <button type="button" (click)="init()">继续</button>
     <button type="button" (click)="tackPhoto()">拍照</button>
   </div>
 
-  <div>{{ error }}</div>
+  <div>{{ logger }}</div>
 
-  <video #targetVideo id="startVideo"></video>
+  <video hidden="true" #targetVideo id="startVideo"></video>
 </div>
