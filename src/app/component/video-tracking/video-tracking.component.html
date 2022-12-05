@@ -20,9 +20,23 @@
   <hr />
   <div>
     <!-- [(ngModel)]="userForm.username" -->
-    <input #vidoeInput type="text" class="form-control" placeholder="请在此处添加" [(ngModel)]="videoBitsPerSecond" />
-    <button type="button" (click)="init()">继续</button>
-    <button type="button" (click)="tackPhoto()">拍照</button>
+    <input
+      matInput
+      #vidoeInput
+      type="text"
+      class="form-control"
+      placeholder="videoBitsPerSecond"
+      [(ngModel)]="videoBitsPerSecond"
+    />
+    <div style="display: block"></div>
+    <mat-radio-group aria-labelledby="example-radio-group-label" class="example-radio-group" [(ngModel)]="mineType">
+      <mat-radio-button class="example-radio-button" *ngFor="let season of seasons" [value]="season">
+        {{ season }}
+      </mat-radio-button>
+    </mat-radio-group>
+
+    <button mat-stroked-button type="button" (click)="init()">继续</button>
+    <button mat-stroked-button type="button" (click)="tackPhoto()">拍照</button>
   </div>
 
   <div>{{ logger }}</div>

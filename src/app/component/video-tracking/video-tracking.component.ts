@@ -38,8 +38,12 @@ export class VideoTrackingComponent implements OnInit {
   requestAnimationFrame: any;
   informationTitle: any;
   videoBitsPerSecond: number;
+  mineType: string;
+  seasons: string[] = ['video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm;codecs=h264', 'video/webm'];
+
   constructor() {
     this.videoBitsPerSecond = 64000;
+    this.mineType = MediaRecorder.isTypeSupported('video/webm; codecs=vp9') ? 'video/webm; codecs=vp9' : 'video/webm';
   }
 
   ngOnInit(): void {
@@ -206,7 +210,8 @@ export class VideoTrackingComponent implements OnInit {
   }
 
   getRecorder(stream: any) {
-    this.logger += `【6. startRecording } 】`;
+    // 获取录屏类型
+    this.logger += `【6. startRecording ,mime} 】${this.mineType}`;
 
     // 按下Enter后自动添加到列表
     // fromEvent<KeyboardEvent>(this.AddTodoInput.nativeElement, 'keyup')
@@ -220,10 +225,13 @@ export class VideoTrackingComponent implements OnInit {
     //   this.store.dispatch(addTodo({ title }))
     //   this.AddTodoInput.nativeElement.value = ''
     // })
+
     this.recorder = window.RecordRTC(stream, {
       type: 'video',
       // only for video track
       videoBitsPerSecond: this.videoBitsPerSecond,
+      mimeType: this.mineType,
+      // mimeType: 'video/webm',
     });
     window.stream = stream;
     this.recorder.startRecording();

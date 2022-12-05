@@ -13,7 +13,11 @@ import { HashLocationStrategy, LocationStrategy } from '@angular/common';
 import { VideoOriginComponent } from './component/video-origin/video-origin.component';
 import { HttpClientModule } from '@angular/common/http';
 import { VideoTrackingComponent } from './component/video-tracking/video-tracking.component';
+// 引入组件
+import { MatButtonModule } from '@angular/material/button';
+import { MatRadioModule } from '@angular/material/radio';
 
+// 模板中使用BasicChecked
 @NgModule({
   declarations: [
     RootComponent,
@@ -25,7 +29,7 @@ import { VideoTrackingComponent } from './component/video-tracking/video-trackin
     VideoOriginComponent,
     VideoTrackingComponent,
   ],
-  imports: [BrowserModule, AppRoutingModule, HttpClientModule, FormsModule],
+  imports: [BrowserModule, AppRoutingModule, HttpClientModule, FormsModule, MatButtonModule, MatRadioModule],
   providers: [
     {
       provide: LocationStrategy,
