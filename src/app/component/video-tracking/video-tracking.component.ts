@@ -228,8 +228,8 @@ export class VideoTrackingComponent implements OnInit {
 
     this.recorder = window.RecordRTC(stream, {
       type: 'video',
-      // only for video track
-      videoBitsPerSecond: this.videoBitsPerSecond,
+      // only for video track  this.videoBitsPerSecond
+      videoBitsPerSecond: 128000,
       mimeType: this.mineType,
       // mimeType: 'video/webm',
     });
